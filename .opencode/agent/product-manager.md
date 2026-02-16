@@ -1,6 +1,9 @@
 ---
 description: Converts raw ideas into tight PRDs with success metrics, user stories, and acceptance criteria. Use when you need a feature scoped, a spec reviewed for completeness, or pricing/packaging impact assessed.
 mode: subagent
+model: github-copilot/claude-opus-4.6
+reasoningEffort: "thinking"
+temperature: 0.15
 tools:
   bash: false
   list: false

@@ -1,6 +1,9 @@
 ---
 description: Stress-tests ideas, requirements, and plans before they become code. Use when you need an opportunity brief, PRD, spec, or implementation plan challenged for clarity, scope, feasibility, and operational readiness.
 mode: subagent
+model: github-copilot/claude-opus-4.6
+reasoningEffort: "thinking"
+temperature: 0.4
 tools:
   bash: false
   task: false

@@ -1,6 +1,9 @@
 ---
 description: Reviews code changes for correctness, security, performance, and maintainability. Use when you need a diff reviewed, a migration audited, or a merge/no-merge verdict.
 mode: subagent
+model: github-copilot/claude-opus-4.6
+reasoningEffort: "thinking"
+temperature: 0.1
 tools:
   bash: false
   task: false
