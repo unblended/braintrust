@@ -9,6 +9,20 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 **Core rule**: Agents produce artifacts; the human approves decisions and merges. Never skip a gate.
 
+## Immutable Plan Rule + Compromise Logs
+
+- Treat `plans/<slug>.md` as immutable once approved.
+- If a step accepts any compromise (deferment, scope cut, reduced quality bar, temporary workaround), create a new compromise file instead of editing the baseline plan.
+- Use `new-doc` type `compromise`:
+
+  ```bash
+  ./scripts/new_doc.sh compromise "<slug>" "step-<n>-<short-title>"
+  ```
+
+- Output path: `plans/compromises/<slug>/YYYYMMDD-<step-tag>.md`
+- Recommended skill: `compromise-log` (captures required details and audit trail quality checks).
+- Step closure gate: either (a) compromise file(s) created and shared, or (b) explicit statement: "No compromises accepted in this step." 
+
 ## Pipeline Steps
 
 ### Step 1 — Opportunity Brief
@@ -28,7 +42,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 3. Use `new-doc` skill: `./scripts/new_doc.sh opportunity "<slug>"`
 4. Invoke the **product-manager** agent with the prompt content from `prompts/product_generate_opportunity-brief.md` and the raw idea as context.
 5. After the agent fills the brief, invoke the **critic** agent with `prompts/critic_generate_critique-report.md` to stress-test it.
-6. Present both the brief and critique to the user for approval.
+6. If compromises are accepted, create compromise log file(s) for this step.
+7. Present both the brief and critique to the user for approval.
 
 **Human checkpoint**: User reviews and approves before proceeding to Step 2.
 
@@ -49,7 +64,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 1. Use `new-doc` skill: `./scripts/new_doc.sh prd "<slug>"`
 2. Invoke the **product-manager** agent with `prompts/product_generate_prd.md` and the opportunity brief as context.
 3. Invoke the **critic** agent to review the PRD.
-4. Present to user. User cuts scope until it fits 1-2 weeks.
+4. If compromises are accepted, create compromise log file(s) for this step.
+5. Present to user. User cuts scope until it fits 1-2 weeks.
 
 **Human checkpoint**: User approves PRD scope before proceeding.
 
@@ -72,7 +88,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 3. The agent also scaffolds ADRs (via `new-doc` skill) and the plan (via `./scripts/new_doc.sh plan "<slug>"`).
 4. Invoke the **security** agent with `prompts/security_generate_threat-model.md` to review security boundaries.
 5. Invoke the **critic** agent to review spec + ADRs + plan.
-6. Present to user.
+6. If compromises are accepted, create compromise log file(s) for this step.
+7. Present to user.
 
 **Human checkpoint**: User approves architecture decisions; rejects complexity they can't operate.
 
@@ -92,7 +109,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 1. Use `new-doc` skill: `./scripts/new_doc.sh threat-model "<slug>"`
 2. Invoke the **security** agent with `prompts/security_generate_threat-model.md`.
-3. Present to user.
+3. If compromises are accepted, create compromise log file(s) for this step.
+4. Present to user.
 
 **Human checkpoint**: User reviews security posture.
 
@@ -112,7 +130,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 1. Use `new-doc` skill: `./scripts/new_doc.sh testplan "<slug>"`
 2. Invoke the **qa** agent with `prompts/qa_generate_test-plan.md`.
-3. Present to user.
+3. If compromises are accepted, create compromise log file(s) for this step.
+4. Present to user.
 
 **Human checkpoint**: User confirms test plan is runnable in <= 30 minutes.
 
@@ -132,7 +151,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 1. Invoke the **spec-executor** agent with `prompts/executor_generate-pr-ready-code.md`, specifying which milestone from `plans/<slug>.md` to implement.
 2. The agent works through one milestone at a time in small commits.
-3. After each milestone, proceed to Step 7 (Review).
+3. If compromises are accepted during build, create compromise log file(s) for this step.
+4. After each milestone, proceed to Step 7 (Review).
 
 **Human checkpoint**: User reviews code before merging. Keep PRs small — 1 milestone per PR.
 
@@ -153,7 +173,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 1. Invoke the **reviewer** agent with `prompts/reviewer_generate_code-report.md` and the diff/changed files.
 2. If NO MERGE: fix issues, then re-review.
 3. If MERGE WITH COMMENTS: address non-blocking items, then merge.
-4. If MERGE: merge.
+4. For any accepted non-blocking deferrals, create compromise log file(s) for this step.
+5. If MERGE: merge.
 
 **Human checkpoint**: User makes final merge decision.
 
@@ -173,7 +194,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 1. If runbook doesn't exist: `./scripts/new_doc.sh runbook "<service>"`
 2. Ensure minimum telemetry: RED metrics, business metric, audit logs.
-3. Enable feature flag / execute rollout plan.
+3. If rollout compromises are accepted, create compromise log file(s) for this step.
+4. Enable feature flag / execute rollout plan.
 
 **Human checkpoint**: User owns the release. Agents assist but don't deploy.
 
@@ -193,7 +215,8 @@ Run the solo SDLC pipeline for a feature. Each step reads prior artifacts, produ
 
 1. Use `new-doc` skill: `./scripts/new_doc.sh retro "<slug>"`
 2. Fill in: did the metric move? What broke? What to automate next?
-3. Update templates/gates based on pain.
+3. Reconcile open compromise logs (`plans/compromises/<slug>/`) and document closure status.
+4. Update templates/gates based on pain.
 
 ---
 

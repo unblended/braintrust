@@ -1,0 +1,26 @@
+{
+  "name": "thought-capture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "migrate:local": "wrangler d1 migrations apply thought-capture-db --local",
+    "migrate:remote": "wrangler d1 migrations apply thought-capture-db --remote"
+  },
+  "dependencies": {
+    "openai": "^4.76.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.99.0"
+  }
+}

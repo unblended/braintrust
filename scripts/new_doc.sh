@@ -13,12 +13,14 @@ EXTRA="${3:-}"
 
 if [[ -z "${TYPE}" || -z "${SLUG}" ]]; then
   echo "Usage: $0 <type> <slug-or-title> [extra]"
-  echo "Types: opportunity prd spec adr adr-light testplan runbook postmortem threat-model retro plan"
+  echo "Types: opportunity prd spec adr adr-light testplan runbook postmortem threat-model retro plan compromise"
   exit 1
 fi
 
 if [[ "${TYPE}" == "plan" ]]; then
   TEMPLATE="docs/templates/implementation-plan.md"
+elif [[ "${TYPE}" == "compromise-log" ]]; then
+  TEMPLATE="docs/templates/compromise.md"
 else
   TEMPLATE="docs/templates/${TYPE}.md"
 fi
@@ -29,6 +31,10 @@ fi
 
 today="$(date +%Y%m%d)"
 safe_slug="$(echo "${SLUG}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')"
+safe_extra=""
+if [[ -n "${EXTRA}" ]]; then
+  safe_extra="$(echo "${EXTRA}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')"
+fi
 
 case "${TYPE}" in
   opportunity)
@@ -62,6 +68,14 @@ case "${TYPE}" in
   plan)
     OUT="plans/${safe_slug}.md"
     ;;
+  compromise|compromise-log)
+    if [[ -z "${safe_extra}" ]]; then
+      echo "Compromise logs require an [extra] step tag."
+      echo "Example: ./scripts/new_doc.sh compromise thought-capture step-6-m1-review"
+      exit 1
+    fi
+    OUT="plans/compromises/${safe_slug}/${today}-${safe_extra}.md"
+    ;;
   *)
     echo "Unknown type: ${TYPE}"
     exit 1
@@ -81,6 +95,7 @@ cp "${TEMPLATE}" "${OUT}"
 sed -i.bak \
   -e "s/{{DATE}}/${today}/g" \
   -e "s/{{SLUG}}/${safe_slug}/g" \
+  -e "s/{{EXTRA}}/${safe_extra}/g" \
   -e "s/{{TITLE}}/${SLUG}/g" \
   "${OUT}"
 rm -f "${OUT}.bak"
