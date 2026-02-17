@@ -64,6 +64,8 @@ export function buildTestEnv(overrides: Partial<Env> = {}): Env {
     OPENAI_API_KEY: "test-openai-key",
     THOUGHT_CAPTURE_V1_ENABLED: "true",
     ENABLED_USER_IDS: "U_ENABLED",
+    CLASSIFICATION_QUEUE_NAME: "thought-classification",
+    DIGEST_DELIVERY_QUEUE_NAME: "digest-delivery",
     ...overrides,
   };
 }

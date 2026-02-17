@@ -129,6 +129,46 @@ describe("handleScheduleCommand", () => {
 
     expect(Number(prefsCount?.count ?? 0)).toBe(0);
   });
+
+  it("uses default timezone when Slack timezone lookup fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        return new Response(JSON.stringify({ ok: false, error: "missing_scope" }), {
+          status: 200,
+        });
+      })
+    );
+
+    const testEnv = buildTestEnv({
+      ENABLED_USER_IDS: "U_ENABLED",
+    });
+    const body = new URLSearchParams({
+      command: "/thoughtcapture",
+      text: "schedule friday 14:30",
+      user_id: "U_ENABLED",
+    }).toString();
+
+    const response = await handleScheduleCommand(body, testEnv);
+    const responseJson = (await response.json()) as {
+      response_type: string;
+      text: string;
+    };
+
+    expect(response.status).toBe(200);
+    expect(responseJson.response_type).toBe("ephemeral");
+    expect(responseJson.text).toContain("America/New_York");
+
+    const prefs = await env.DB.prepare(
+      `SELECT timezone
+       FROM user_prefs
+       WHERE slack_user_id = ?`
+    )
+      .bind("U_ENABLED")
+      .first<{ timezone: string }>();
+
+    expect(prefs?.timezone).toBe("America/New_York");
+  });
 });
 
 function stubTimezoneFetch(timezone: string): void {

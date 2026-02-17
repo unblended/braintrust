@@ -1,5 +1,6 @@
 import { checkUserAccess, getAccessRejectionMessage } from "./feature-flags";
 import { jsonResponse } from "./health";
+import { logError, logWarn } from "./logging";
 import { SlackClient } from "./slack-client";
 import { fetchTimezone } from "./timezone-utils";
 import type { Env } from "./types";
@@ -85,46 +86,66 @@ export async function handleScheduleCommand(
   env: Env,
   deps: ScheduleCommandDependencies = createScheduleCommandDependencies()
 ): Promise<Response> {
-  const params = new URLSearchParams(rawBody);
-  const userId = params.get("user_id");
-  const text = params.get("text") ?? "";
+  try {
+    const params = new URLSearchParams(rawBody);
+    const userId = params.get("user_id");
+    const text = params.get("text") ?? "";
 
-  if (!userId) {
+    if (!userId) {
+      return commandResponse(
+        "Usage: /thoughtcapture schedule <day> <HH:MM>. Example: /thoughtcapture schedule friday 14:00"
+      );
+    }
+
+    const access = checkUserAccess(env, userId);
+    if (!access.allowed) {
+      return commandResponse(getAccessRejectionMessage(access.reason!));
+    }
+
+    const parsed = parseScheduleCommandText(text);
+    if (!parsed) {
+      return commandResponse(
+        "Usage: /thoughtcapture schedule <day> <HH:MM>. Example: /thoughtcapture schedule friday 14:00"
+      );
+    }
+
+    const existingPrefs = await deps.userPrefsRepository.findByUserId(env.DB, userId);
+    const slackClient = deps.createSlackClient(env.SLACK_BOT_TOKEN);
+
+    let timezone = existingPrefs?.timezone;
+    if (!timezone) {
+      try {
+        timezone = await fetchTimezone(slackClient, userId);
+      } catch (error) {
+        timezone = "UTC";
+        logWarn("schedule.timezone_fallback", {
+          user_id: userId,
+          fallback_timezone: timezone,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const welcomed = existingPrefs?.welcomed === 1 ? 1 : 0;
+
+    await deps.userPrefsRepository.upsert(env.DB, {
+      slackUserId: userId,
+      digestDay: parsed.digestDay,
+      digestHour: parsed.digestHour,
+      digestMinute: parsed.digestMinute,
+      timezone,
+      welcomed,
+    });
+
     return commandResponse(
-      "Usage: /thoughtcapture schedule <day> <HH:MM>. Example: /thoughtcapture schedule friday 14:00"
+      `Digest schedule updated: ${DAY_LABELS[parsed.digestDay]} at ${formatTime(parsed.digestHour, parsed.digestMinute)} (${timezone}).`
+    );
+  } catch (error) {
+    logError("schedule.command_failed", error);
+    return commandResponse(
+      "Something went wrong while updating your schedule. Please try again."
     );
   }
-
-  const access = checkUserAccess(env, userId);
-  if (!access.allowed) {
-    return commandResponse(getAccessRejectionMessage(access.reason!));
-  }
-
-  const parsed = parseScheduleCommandText(text);
-  if (!parsed) {
-    return commandResponse(
-      "Usage: /thoughtcapture schedule <day> <HH:MM>. Example: /thoughtcapture schedule friday 14:00"
-    );
-  }
-
-  const existingPrefs = await deps.userPrefsRepository.findByUserId(env.DB, userId);
-  const slackClient = deps.createSlackClient(env.SLACK_BOT_TOKEN);
-  const timezone =
-    existingPrefs?.timezone ?? (await fetchTimezone(slackClient, userId));
-  const welcomed = existingPrefs?.welcomed === 1 ? 1 : 0;
-
-  await deps.userPrefsRepository.upsert(env.DB, {
-    slackUserId: userId,
-    digestDay: parsed.digestDay,
-    digestHour: parsed.digestHour,
-    digestMinute: parsed.digestMinute,
-    timezone,
-    welcomed,
-  });
-
-  return commandResponse(
-    `Digest schedule updated: ${DAY_LABELS[parsed.digestDay]} at ${formatTime(parsed.digestHour, parsed.digestMinute)} (${timezone}).`
-  );
 }
 
 function commandResponse(message: string): Response {

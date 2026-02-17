@@ -17,6 +17,8 @@ export interface Env {
   // Vars (defined in wrangler.jsonc vars)
   THOUGHT_CAPTURE_V1_ENABLED: string;
   ENABLED_USER_IDS: string;
+  CLASSIFICATION_QUEUE_NAME: string;
+  DIGEST_DELIVERY_QUEUE_NAME: string;
 }
 
 /**

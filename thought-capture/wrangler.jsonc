@@ -1,23 +1,36 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-
   "name": "thought-capture",
   "main": "src/index.ts",
   "compatibility_date": "2026-02-16",
   "compatibility_flags": ["nodejs_compat"],
-
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
   "routes": [
     {
       "pattern": "bt.tylerevans.co",
       "custom_domain": true
     }
   ],
-
   "vars": {
     "THOUGHT_CAPTURE_V1_ENABLED": "true",
-    "ENABLED_USER_IDS": ""
+    "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+    "CLASSIFICATION_QUEUE_NAME": "thought-classification",
+    "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery"
   },
-
   "queues": {
     "producers": [
       {
@@ -44,16 +57,16 @@
       }
     ]
   },
-
   "triggers": {
     "crons": ["*/15 * * * *", "0 3 * * *", "*/5 * * * *"]
   },
-
   "env": {
     "local": {
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery"
       },
       "d1_databases": [
         {
@@ -99,7 +112,9 @@
       ],
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification-staging",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery-staging"
       },
       "d1_databases": [
         {
@@ -145,7 +160,9 @@
       ],
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification-production",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery-production"
       },
       "d1_databases": [
         {

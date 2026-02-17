@@ -34,6 +34,7 @@ export default {
       const verifier = new SlackVerifier(env.SLACK_SIGNING_SECRET);
       const isValidSignature = await verifier.verifyRequest(request.headers, body);
       if (!isValidSignature) {
+        logWarn("slack.signature_invalid", { path: url.pathname });
         return jsonResponse({ error: "Invalid Slack signature" }, 401);
       }
 
@@ -58,22 +59,28 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    switch (batch.queue) {
-      case "thought-classification":
-        await handleClassificationBatch(
-          batch as MessageBatch<ClassificationMessage>,
-          env
-        );
-        break;
-      case "digest-delivery":
-        await handleDigestDeliveryBatch(
-          batch as MessageBatch<DigestDeliveryMessage>,
-          env
-        );
-        break;
-      default:
-        logWarn("queue.unknown", { queue: batch.queue });
+    const classificationQueueName =
+      env.CLASSIFICATION_QUEUE_NAME || "thought-classification";
+    const digestDeliveryQueueName =
+      env.DIGEST_DELIVERY_QUEUE_NAME || "digest-delivery";
+
+    if (batch.queue === classificationQueueName) {
+      await handleClassificationBatch(
+        batch as MessageBatch<ClassificationMessage>,
+        env
+      );
+      return;
     }
+
+    if (batch.queue === digestDeliveryQueueName) {
+      await handleDigestDeliveryBatch(
+        batch as MessageBatch<DigestDeliveryMessage>,
+        env
+      );
+      return;
+    }
+
+    logWarn("queue.unknown", { queue: batch.queue });
   },
 
   async scheduled(
