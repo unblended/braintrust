@@ -10,7 +10,7 @@
     "build": "wrangler deploy --dry-run",
     "build:staging": "wrangler deploy --dry-run --env staging",
     "build:production": "wrangler deploy --dry-run --env production",
-    "validate:config": "wrangler deploy --dry-run && wrangler deploy --dry-run --env staging && wrangler deploy --dry-run --env production",
+    "validate:config": "wrangler deploy --dry-run --env=\"\" && wrangler deploy --dry-run --env staging && wrangler deploy --dry-run --env production",
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,10 +25,10 @@
     "openai": "^4.76.0"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/vitest-pool-workers": "^0.5.41",
     "@cloudflare/workers-types": "^4.20241218.0",
     "typescript": "^5.7.0",
     "vitest": "^2.1.0",
-    "wrangler": "^3.99.0"
+    "wrangler": "^4.65.0"
   }
 }
