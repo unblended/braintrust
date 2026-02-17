@@ -19,11 +19,11 @@ Configure these secrets in GitHub (repository or environment scope):
 
 ## Optional Environment Variables
 
-Configure these in GitHub Environment variables (`staging`, `production`) when needed:
+Configure this in GitHub Environment variables (`staging`, `production`) when needed:
 
-- `CLOUDFLARE_D1_DATABASE_NAME` (defaults to `thought-capture-db` when empty)
-- `CLOUDFLARE_WRANGLER_ENV` (for `wrangler deploy --env <name>`)
 - `HEALTHCHECK_URL` (base URL; workflow checks `<base>/health`)
+
+Note: staging and production workflows now set `d1_database_name` and `wrangler_environment` explicitly (`thought-capture-db-staging`/`staging` and `thought-capture-db-production`/`production`) to avoid accidental default-environment deploys.
 
 ## Recommended GitHub Environment Protections
 

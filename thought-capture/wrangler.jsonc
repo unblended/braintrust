@@ -1,186 +1,203 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-
   "name": "thought-capture",
   "main": "src/index.ts",
   "compatibility_date": "2026-02-16",
   "compatibility_flags": ["nodejs_compat"],
-
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1,
+    },
+  },
   "routes": [
     {
       "pattern": "bt.tylerevans.co",
-      "custom_domain": true
-    }
+      "custom_domain": true,
+    },
   ],
-
   "vars": {
     "THOUGHT_CAPTURE_V1_ENABLED": "true",
-    "ENABLED_USER_IDS": ""
+    "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+    "CLASSIFICATION_QUEUE_NAME": "thought-classification",
+    "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery",
   },
-
   "queues": {
     "producers": [
       {
         "queue": "thought-classification",
-        "binding": "CLASSIFICATION_QUEUE"
+        "binding": "CLASSIFICATION_QUEUE",
       },
       {
         "queue": "digest-delivery",
-        "binding": "DIGEST_DELIVERY_QUEUE"
-      }
+        "binding": "DIGEST_DELIVERY_QUEUE",
+      },
     ],
     "consumers": [
       {
         "queue": "thought-classification",
         "max_batch_size": 1,
         "max_retries": 3,
-        "dead_letter_queue": "thought-classification-dlq"
+        "dead_letter_queue": "thought-classification-dlq",
       },
       {
         "queue": "digest-delivery",
         "max_batch_size": 5,
         "max_retries": 3,
-        "dead_letter_queue": "digest-delivery-dlq"
-      }
-    ]
+        "dead_letter_queue": "digest-delivery-dlq",
+      },
+    ],
   },
-
   "triggers": {
-    "crons": ["*/15 * * * *", "0 3 * * *", "*/5 * * * *"]
+    "crons": ["*/15 * * * *", "0 3 * * *", "*/5 * * * *"],
   },
-
   "env": {
     "local": {
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery",
       },
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "thought-capture-db",
           "database_id": "local-dev-placeholder",
-          "migrations_dir": "migrations"
-        }
+          "migrations_dir": "migrations",
+        },
       ],
       "queues": {
         "producers": [
           {
             "queue": "thought-classification",
-            "binding": "CLASSIFICATION_QUEUE"
+            "binding": "CLASSIFICATION_QUEUE",
           },
           {
             "queue": "digest-delivery",
-            "binding": "DIGEST_DELIVERY_QUEUE"
-          }
+            "binding": "DIGEST_DELIVERY_QUEUE",
+          },
         ],
         "consumers": [
           {
             "queue": "thought-classification",
             "max_batch_size": 1,
             "max_retries": 3,
-            "dead_letter_queue": "thought-classification-dlq"
+            "dead_letter_queue": "thought-classification-dlq",
           },
           {
             "queue": "digest-delivery",
             "max_batch_size": 5,
             "max_retries": 3,
-            "dead_letter_queue": "digest-delivery-dlq"
-          }
-        ]
-      }
+            "dead_letter_queue": "digest-delivery-dlq",
+          },
+        ],
+      },
     },
     "staging": {
       "routes": [
         {
           "pattern": "bt-stg.tylerevans.co",
-          "custom_domain": true
-        }
+          "custom_domain": true,
+        },
       ],
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification-staging",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery-staging",
       },
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "thought-capture-db-staging",
           "database_id": "0947a45a-ed1f-4c7b-a3f8-c99f5ddf2d96",
-          "migrations_dir": "migrations"
-        }
+          "migrations_dir": "migrations",
+        },
       ],
       "queues": {
         "producers": [
           {
             "queue": "thought-classification-staging",
-            "binding": "CLASSIFICATION_QUEUE"
+            "binding": "CLASSIFICATION_QUEUE",
           },
           {
             "queue": "digest-delivery-staging",
-            "binding": "DIGEST_DELIVERY_QUEUE"
-          }
+            "binding": "DIGEST_DELIVERY_QUEUE",
+          },
         ],
         "consumers": [
           {
             "queue": "thought-classification-staging",
             "max_batch_size": 1,
             "max_retries": 3,
-            "dead_letter_queue": "thought-classification-staging-dlq"
+            "dead_letter_queue": "thought-classification-staging-dlq",
           },
           {
             "queue": "digest-delivery-staging",
             "max_batch_size": 5,
             "max_retries": 3,
-            "dead_letter_queue": "digest-delivery-staging-dlq"
-          }
-        ]
-      }
+            "dead_letter_queue": "digest-delivery-staging-dlq",
+          },
+        ],
+      },
     },
     "production": {
       "routes": [
         {
           "pattern": "bt.tylerevans.co",
-          "custom_domain": true
-        }
+          "custom_domain": true,
+        },
       ],
       "vars": {
         "THOUGHT_CAPTURE_V1_ENABLED": "true",
-        "ENABLED_USER_IDS": ""
+        "ENABLED_USER_IDS": "U0AAKG0ECQ5",
+        "CLASSIFICATION_QUEUE_NAME": "thought-classification-production",
+        "DIGEST_DELIVERY_QUEUE_NAME": "digest-delivery-production",
       },
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "thought-capture-db-production",
           "database_id": "71e20524-441a-4bef-8445-642f10106e9b",
-          "migrations_dir": "migrations"
-        }
+          "migrations_dir": "migrations",
+        },
       ],
       "queues": {
         "producers": [
           {
             "queue": "thought-classification-production",
-            "binding": "CLASSIFICATION_QUEUE"
+            "binding": "CLASSIFICATION_QUEUE",
           },
           {
             "queue": "digest-delivery-production",
-            "binding": "DIGEST_DELIVERY_QUEUE"
-          }
+            "binding": "DIGEST_DELIVERY_QUEUE",
+          },
         ],
         "consumers": [
           {
             "queue": "thought-classification-production",
             "max_batch_size": 1,
             "max_retries": 3,
-            "dead_letter_queue": "thought-classification-production-dlq"
+            "dead_letter_queue": "thought-classification-production-dlq",
           },
           {
             "queue": "digest-delivery-production",
             "max_batch_size": 5,
             "max_retries": 3,
-            "dead_letter_queue": "digest-delivery-production-dlq"
-          }
-        ]
-      }
-    }
-  }
+            "dead_letter_queue": "digest-delivery-production-dlq",
+          },
+        ],
+      },
+    },
+  },
 }
