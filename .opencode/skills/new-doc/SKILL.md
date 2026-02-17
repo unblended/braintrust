@@ -45,11 +45,11 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
    ./scripts/new_doc.sh prd offline-sync
    ./scripts/new_doc.sh adr "sync conflict resolution" 0007
    ./scripts/new_doc.sh testplan checkout-flow
-    ./scripts/new_doc.sh threat-model payment-api
-    ./scripts/new_doc.sh retro offline-sync
-    ./scripts/new_doc.sh plan offline-sync
-    ./scripts/new_doc.sh compromise offline-sync step-7-m1-review
-    ```
+   ./scripts/new_doc.sh threat-model payment-api
+   ./scripts/new_doc.sh retro offline-sync
+   ./scripts/new_doc.sh plan offline-sync
+   ./scripts/new_doc.sh compromise offline-sync step-7-m1-review
+   ```
 
 5. **Read the created file.** The script prints the output path. Read the file to confirm it was created and tokens (`{{DATE}}`, `{{SLUG}}`, `{{TITLE}}`) were replaced.
 

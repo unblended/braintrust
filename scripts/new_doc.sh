@@ -19,7 +19,7 @@ fi
 
 if [[ "${TYPE}" == "plan" ]]; then
   TEMPLATE="docs/templates/implementation-plan.md"
-elif [[ "${TYPE}" == "compromise-log" ]]; then
+elif [[ "${TYPE}" == "compromise" || "${TYPE}" == "compromise-log" ]]; then
   TEMPLATE="docs/templates/compromise.md"
 else
   TEMPLATE="docs/templates/${TYPE}.md"
