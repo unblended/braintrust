@@ -74,33 +74,33 @@
         {
           "binding": "DB",
           "database_name": "thought-capture-db-staging",
-          "database_id": "local-dev-placeholder",
+          "database_id": "0947a45a-ed1f-4c7b-a3f8-c99f5ddf2d96",
           "migrations_dir": "migrations"
         }
       ],
       "queues": {
         "producers": [
           {
-            "queue": "thought-classification",
+            "queue": "thought-classification-staging",
             "binding": "CLASSIFICATION_QUEUE"
           },
           {
-            "queue": "digest-delivery",
+            "queue": "digest-delivery-staging",
             "binding": "DIGEST_DELIVERY_QUEUE"
           }
         ],
         "consumers": [
           {
-            "queue": "thought-classification",
+            "queue": "thought-classification-staging",
             "max_batch_size": 1,
             "max_retries": 3,
-            "dead_letter_queue": "thought-classification-dlq"
+            "dead_letter_queue": "thought-classification-staging-dlq"
           },
           {
-            "queue": "digest-delivery",
+            "queue": "digest-delivery-staging",
             "max_batch_size": 5,
             "max_retries": 3,
-            "dead_letter_queue": "digest-delivery-dlq"
+            "dead_letter_queue": "digest-delivery-staging-dlq"
           }
         ]
       }
@@ -120,33 +120,33 @@
         {
           "binding": "DB",
           "database_name": "thought-capture-db-production",
-          "database_id": "local-dev-placeholder",
+          "database_id": "71e20524-441a-4bef-8445-642f10106e9b",
           "migrations_dir": "migrations"
         }
       ],
       "queues": {
         "producers": [
           {
-            "queue": "thought-classification",
+            "queue": "thought-classification-production",
             "binding": "CLASSIFICATION_QUEUE"
           },
           {
-            "queue": "digest-delivery",
+            "queue": "digest-delivery-production",
             "binding": "DIGEST_DELIVERY_QUEUE"
           }
         ],
         "consumers": [
           {
-            "queue": "thought-classification",
+            "queue": "thought-classification-production",
             "max_batch_size": 1,
             "max_retries": 3,
-            "dead_letter_queue": "thought-classification-dlq"
+            "dead_letter_queue": "thought-classification-production-dlq"
           },
           {
-            "queue": "digest-delivery",
+            "queue": "digest-delivery-production",
             "max_batch_size": 5,
             "max_retries": 3,
-            "dead_letter_queue": "digest-delivery-dlq"
+            "dead_letter_queue": "digest-delivery-production-dlq"
           }
         ]
       }
