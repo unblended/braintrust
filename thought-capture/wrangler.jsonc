@@ -73,7 +73,7 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "thought-capture-db",
+          "database_name": "thought-capture-db-staging",
           "database_id": "local-dev-placeholder",
           "migrations_dir": "migrations"
         }
@@ -119,7 +119,7 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "thought-capture-db",
+          "database_name": "thought-capture-db-production",
           "database_id": "local-dev-placeholder",
           "migrations_dir": "migrations"
         }
