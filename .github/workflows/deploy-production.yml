@@ -19,7 +19,7 @@ jobs:
     with:
       github_environment: production
       git_ref: ${{ inputs.git_ref }}
-      d1_database_name: ${{ vars.CLOUDFLARE_D1_DATABASE_NAME }}
-      wrangler_environment: ${{ vars.CLOUDFLARE_WRANGLER_ENV }}
+      d1_database_name: thought-capture-db-production
+      wrangler_environment: production
       healthcheck_url: ${{ vars.HEALTHCHECK_URL }}
     secrets: inherit
