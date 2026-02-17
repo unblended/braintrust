@@ -1,6 +1,9 @@
 ---
 description: Produces test plans, pre-deploy checklists, and observability checks. Use when you need test coverage for a feature, a QA audit, or a ship-readiness checklist.
 mode: subagent
+model: github-copilot/claude-opus-4.6
+reasoningEffort: "thinking"
+temperature: 0.3
 tools:
   bash: false
   task: false

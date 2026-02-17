@@ -1,6 +1,6 @@
 ---
 name: new-doc
-description: Create a new document from a project template using scripts/new_doc.sh. Use when asked to create a PRD, ADR, spec, testplan, runbook, postmortem, threat-model, retro, plan, or opportunity doc.
+description: Create a new document from a project template using scripts/new_doc.sh. Use when asked to create a PRD, ADR, spec, testplan, runbook, postmortem, threat-model, retro, plan, opportunity, or compromise log doc.
 ---
 
 # New Document from Template
@@ -22,14 +22,17 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
 | `threat-model` | `docs/templates/threat-model.md`| `docs/security/<slug>-threat-model.md`       | —             |
 | `retro`        | `docs/templates/retro.md`       | `docs/retro/YYYYMMDD-<slug>.md`              | —             |
 | `plan`         | `docs/templates/implementation-plan.md` | `plans/<slug>.md`                    | —             |
+| `compromise`   | `docs/templates/compromise.md`  | `plans/compromises/<slug>/YYYYMMDD-<step-tag>.md` | step tag |
 
 ## Workflow
 
 1. **Determine the document type.** Match the user's request to one of the types above. If ambiguous, ask.
 
-2. **Determine the slug.** Use the feature or topic name. The script normalizes it to lowercase-kebab-case automatically. Keep it short and descriptive (e.g., `offline-sync`, `billing-v2`, `rate-limiting`).
+2. **Determine the slug.** Use the feature or topic name. The script normalizes it to lowercase-kebab-case automatically. Keep it short and descriptive (e.g., `offline-sync`, `billing-v2`, `rate-limiting`). For `compromise`, this slug is the feature slug whose plan stays immutable.
 
-3. **For ADRs, determine the number.** Check existing files in `docs/adr/` to find the next available number. Format as zero-padded 4 digits (e.g., `0007`). Pass as the third argument.
+3. **Determine the extra argument when required.**
+   - For `adr` or `adr-light`: determine the ADR number. Check existing files in `docs/adr/` to find the next available number. Format as zero-padded 4 digits (e.g., `0007`).
+   - For `compromise`: provide a step tag (e.g., `step-7-m1-review`, `step-3-architecture-gap`).
 
 4. **Run the script.**
 
@@ -45,6 +48,7 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
    ./scripts/new_doc.sh threat-model payment-api
    ./scripts/new_doc.sh retro offline-sync
    ./scripts/new_doc.sh plan offline-sync
+   ./scripts/new_doc.sh compromise offline-sync step-7-m1-review
    ```
 
 5. **Read the created file.** The script prints the output path. Read the file to confirm it was created and tokens (`{{DATE}}`, `{{SLUG}}`, `{{TITLE}}`) were replaced.
@@ -55,6 +59,7 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
 
 - If the user says "create a PRD" without a slug, ask for a short name.
 - If the user says "create an ADR" without a number, check `docs/adr/` for the next available number.
+- If the user says "log a compromise" without a step tag, ask for one (recommended format: `step-<n>-<short-title>`).
 - Never overwrite an existing file — the script refuses and exits with an error. If the file already exists, inform the user and ask how to proceed.
 - Always run the script from the project root directory.
 
@@ -62,7 +67,7 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
 
 - The script exits 0 and prints `Created: <path>` on success.
 - The script exits 1 with an error message if: type is unknown, template is missing, slug is empty, or output file already exists.
-- After creation, read the output file and verify `{{DATE}}`, `{{SLUG}}`, and `{{TITLE}}` are no longer present (they should be replaced).
+- After creation, read the output file and verify `{{DATE}}`, `{{SLUG}}`, and `{{TITLE}}` are no longer present (and `{{EXTRA}}` for templates that use it).
 
 ## Failure modes
 
@@ -70,5 +75,6 @@ Scaffold a new document from the project's `docs/templates/` using the `scripts/
 |---|---|---|
 | `Template not found` | Type doesn't match a file in `docs/templates/` | Check spelling; list `docs/templates/` to see available templates |
 | `Refusing to overwrite existing file` | Document already exists at that path | Use a different slug or ask the user if they want to edit the existing file |
+| `Compromise logs require an [extra] step tag` | Missing step tag for `compromise` type | Re-run with a step tag, e.g. `step-7-m1-review` |
 | `sed: command not found` or sed errors | macOS vs GNU sed incompatibility | The script uses `sed -i.bak` which works on both; if it fails, check the script is unmodified |
 | Permission denied | Script not executable | Run `chmod +x scripts/new_doc.sh` |

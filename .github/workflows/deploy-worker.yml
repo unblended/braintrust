@@ -1,0 +1,94 @@
+name: Deploy Worker (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      github_environment:
+        description: GitHub Environment name
+        required: true
+        type: string
+      git_ref:
+        description: Git ref (branch, tag, or SHA) to deploy
+        required: false
+        default: ""
+        type: string
+      d1_database_name:
+        description: Cloudflare D1 database name for migrations
+        required: false
+        default: thought-capture-db
+        type: string
+      wrangler_environment:
+        description: Optional Wrangler environment name
+        required: false
+        default: ""
+        type: string
+      healthcheck_url:
+        description: Optional base URL for post-deploy health check
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.github_environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.github_environment }}
+    concurrency:
+      group: worker-${{ inputs.github_environment }}
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: thought-capture
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GIT_REF: ${{ inputs.git_ref }}
+      D1_DATABASE_NAME: ${{ inputs.d1_database_name }}
+      WRANGLER_ENVIRONMENT: ${{ inputs.wrangler_environment }}
+      HEALTHCHECK_URL: ${{ inputs.healthcheck_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref != '' && inputs.git_ref || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: thought-capture/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply D1 migrations (remote)
+        run: |
+          DATABASE_NAME="${D1_DATABASE_NAME:-thought-capture-db}"
+
+          if [ -n "$WRANGLER_ENVIRONMENT" ]; then
+            npx wrangler d1 migrations apply "$DATABASE_NAME" --remote --env "$WRANGLER_ENVIRONMENT"
+          else
+            npx wrangler d1 migrations apply "$DATABASE_NAME" --remote
+          fi
+
+      - name: Deploy Worker
+        run: |
+          if [ -n "$WRANGLER_ENVIRONMENT" ]; then
+            npx wrangler deploy --env "$WRANGLER_ENVIRONMENT"
+          else
+            npx wrangler deploy
+          fi
+
+      - name: Smoke check /health
+        if: ${{ inputs.healthcheck_url != '' }}
+        run: |
+          HEALTH_URL="${HEALTHCHECK_URL%/}/health"
+          curl -fsS "$HEALTH_URL"

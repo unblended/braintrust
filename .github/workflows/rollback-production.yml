@@ -1,0 +1,65 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_id:
+        description: Worker version ID to roll back to
+        required: true
+        type: string
+      wrangler_environment:
+        description: Optional Wrangler environment name
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    concurrency:
+      group: worker-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: thought-capture
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      VERSION_ID: ${{ inputs.version_id }}
+      WRANGLER_ENVIRONMENT: ${{ inputs.wrangler_environment != '' && inputs.wrangler_environment || vars.CLOUDFLARE_WRANGLER_ENV }}
+      HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: thought-capture/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Roll back Worker
+        run: |
+          if [ -n "$WRANGLER_ENVIRONMENT" ]; then
+            npx wrangler rollback "$VERSION_ID" --env "$WRANGLER_ENVIRONMENT"
+          else
+            npx wrangler rollback "$VERSION_ID"
+          fi
+
+      - name: Smoke check /health
+        if: ${{ vars.HEALTHCHECK_URL != '' }}
+        run: |
+          HEALTH_URL="${HEALTHCHECK_URL%/}/health"
+          curl -fsS "$HEALTH_URL"

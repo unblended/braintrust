@@ -1,6 +1,9 @@
 ---
 description: Translates PRDs into technical specs with data models, API contracts, ADRs, and rollout plans. Use when you need system architecture designed or architectural tradeoffs evaluated.
 mode: subagent
+model: github-copilot/claude-opus-4.6
+reasoningEffort: "thinking"
+temperature: 0.2
 tools:
   bash: false
   task: false

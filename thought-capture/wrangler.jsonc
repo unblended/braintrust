@@ -1,0 +1,155 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  "name": "thought-capture",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-16",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "routes": [
+    {
+      "pattern": "bt.tylerevans.co",
+      "custom_domain": true
+    }
+  ],
+
+  "vars": {
+    "THOUGHT_CAPTURE_V1_ENABLED": "true",
+    "ENABLED_USER_IDS": ""
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "thought-capture-db",
+      "database_id": "local-dev-placeholder",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "queues": {
+    "producers": [
+      {
+        "queue": "thought-classification",
+        "binding": "CLASSIFICATION_QUEUE"
+      },
+      {
+        "queue": "digest-delivery",
+        "binding": "DIGEST_DELIVERY_QUEUE"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "thought-classification",
+        "max_batch_size": 1,
+        "max_retries": 3,
+        "dead_letter_queue": "thought-classification-dlq"
+      },
+      {
+        "queue": "digest-delivery",
+        "max_batch_size": 5,
+        "max_retries": 3,
+        "dead_letter_queue": "digest-delivery-dlq"
+      }
+    ]
+  },
+
+  "triggers": {
+    "crons": ["*/15 * * * *", "0 3 * * *", "*/5 * * * *"]
+  },
+
+  "env": {
+    "staging": {
+      "routes": [
+        {
+          "pattern": "bt-stg.tylerevans.co",
+          "custom_domain": true
+        }
+      ],
+      "vars": {
+        "THOUGHT_CAPTURE_V1_ENABLED": "true",
+        "ENABLED_USER_IDS": ""
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "thought-capture-db",
+          "database_id": "local-dev-placeholder",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "queue": "thought-classification",
+            "binding": "CLASSIFICATION_QUEUE"
+          },
+          {
+            "queue": "digest-delivery",
+            "binding": "DIGEST_DELIVERY_QUEUE"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "thought-classification",
+            "max_batch_size": 1,
+            "max_retries": 3,
+            "dead_letter_queue": "thought-classification-dlq"
+          },
+          {
+            "queue": "digest-delivery",
+            "max_batch_size": 5,
+            "max_retries": 3,
+            "dead_letter_queue": "digest-delivery-dlq"
+          }
+        ]
+      }
+    },
+    "production": {
+      "routes": [
+        {
+          "pattern": "bt.tylerevans.co",
+          "custom_domain": true
+        }
+      ],
+      "vars": {
+        "THOUGHT_CAPTURE_V1_ENABLED": "true",
+        "ENABLED_USER_IDS": ""
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "thought-capture-db",
+          "database_id": "local-dev-placeholder",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "queue": "thought-classification",
+            "binding": "CLASSIFICATION_QUEUE"
+          },
+          {
+            "queue": "digest-delivery",
+            "binding": "DIGEST_DELIVERY_QUEUE"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "thought-classification",
+            "max_batch_size": 1,
+            "max_retries": 3,
+            "dead_letter_queue": "thought-classification-dlq"
+          },
+          {
+            "queue": "digest-delivery",
+            "max_batch_size": 5,
+            "max_retries": 3,
+            "dead_letter_queue": "digest-delivery-dlq"
+          }
+        ]
+      }
+    }
+  }
+}

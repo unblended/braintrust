@@ -1,0 +1,34 @@
+{
+  "name": "thought-capture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "dev:staging": "wrangler dev --local --env staging --persist-to .wrangler/state --test-scheduled",
+    "dev:production": "wrangler dev --local --env production --persist-to .wrangler/state --test-scheduled",
+    "build": "wrangler deploy --dry-run",
+    "build:staging": "wrangler deploy --dry-run --env staging",
+    "build:production": "wrangler deploy --dry-run --env production",
+    "validate:config": "wrangler deploy --dry-run && wrangler deploy --dry-run --env staging && wrangler deploy --dry-run --env production",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "migrate:local": "wrangler d1 migrations apply thought-capture-db --local",
+    "migrate:local:staging": "wrangler d1 migrations apply thought-capture-db --local --env staging --persist-to .wrangler/state",
+    "migrate:local:production": "wrangler d1 migrations apply thought-capture-db --local --env production --persist-to .wrangler/state",
+    "migrate:remote": "wrangler d1 migrations apply thought-capture-db --remote",
+    "local:send-event": "node scripts/send-local-slack-event.mjs"
+  },
+  "dependencies": {
+    "openai": "^4.76.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.99.0"
+  }
+}

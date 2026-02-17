@@ -1,6 +1,10 @@
 ---
 description: Performs threat modeling, reviews authn/authz boundaries, and checks data lifecycle compliance. Use when you need a security audit, threat model, or compliance review before release.
 mode: subagent
+model: openai/gpt-5.3-codex
+reasoningEffort: "xhigh"
+variant: "xhigh"
+temperature: 0.2
 tools:
   bash: false
   task: false
