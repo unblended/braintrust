@@ -14,7 +14,7 @@ export interface Env {
   SLACK_SIGNING_SECRET: string;
   OPENAI_API_KEY: string;
 
-  // Vars (defined in wrangler.toml [vars])
+  // Vars (defined in wrangler.jsonc vars)
   THOUGHT_CAPTURE_V1_ENABLED: string;
   ENABLED_USER_IDS: string;
 }
