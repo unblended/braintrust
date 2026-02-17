@@ -1,0 +1,25 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: Git ref (branch, tag, or SHA) to deploy
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-worker.yml
+    with:
+      github_environment: production
+      git_ref: ${{ inputs.git_ref }}
+      d1_database_name: ${{ vars.CLOUDFLARE_D1_DATABASE_NAME }}
+      wrangler_environment: ${{ vars.CLOUDFLARE_WRANGLER_ENV }}
+      healthcheck_url: ${{ vars.HEALTHCHECK_URL }}
+    secrets: inherit

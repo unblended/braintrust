@@ -1,0 +1,33 @@
+name: Deploy Staging
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: Git ref (branch, tag, or SHA) to deploy
+        required: false
+        default: main
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/deploy-worker.yml
+    with:
+      github_environment: staging
+      git_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.event.workflow_run.head_sha }}
+      d1_database_name: ${{ vars.CLOUDFLARE_D1_DATABASE_NAME }}
+      wrangler_environment: ${{ vars.CLOUDFLARE_WRANGLER_ENV }}
+      healthcheck_url: ${{ vars.HEALTHCHECK_URL }}
+    secrets: inherit
