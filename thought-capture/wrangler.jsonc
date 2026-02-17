@@ -22,7 +22,7 @@
     {
       "binding": "DB",
       "database_name": "thought-capture-db",
-      "database_id": "local-dev-placeholder",
+      "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }
   ],
